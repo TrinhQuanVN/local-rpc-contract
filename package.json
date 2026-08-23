@@ -1,0 +1,30 @@
+{
+  "name": "local-rpc-contract",
+  "version": "0.1.0",
+  "description": "Contract tRPC dùng chung giữa OCR_local_host (server) và domain taodeptrai (client) - gọi hàm local qua tunnel có kiểu đầy đủ.",
+  "type": "module",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "@trpc/server": "^11.0.0",
+    "zod": "^3.23.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@trpc/server": {
+      "optional": false
+    },
+    "zod": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@trpc/server": "^11.18.0",
+    "typescript": "^7.0.2",
+    "zod": "^3.25.76"
+  }
+}
