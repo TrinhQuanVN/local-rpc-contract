@@ -3,6 +3,7 @@ import type { LocalContext } from "./services";
 import {
   GetInvoiceInput, GetInvoiceOutput,
   NotifyPaymentEditedInput, NotifyPaymentEditedOutput,
+  RequestUuidSyncInput, RequestUuidSyncOutput,
   PingOutput,
 } from "./contract";
 
@@ -24,6 +25,13 @@ export const appRouter = t.router({
     .input(NotifyPaymentEditedInput)
     .output(NotifyPaymentEditedOutput)
     .mutation(({ input, ctx }) => ctx.services.notifyPaymentEdited(input)),
+
+  // Domain vừa phát hành HĐ gốc -> local ghi hàng đợi kéo HĐ theo transactionUuid (fire-and-forget).
+  // Thay MCP tool viettel-sync-uuid-request (gỡ 2026-08-25).
+  requestUuidSync: t.procedure
+    .input(RequestUuidSyncInput)
+    .output(RequestUuidSyncOutput)
+    .mutation(({ input, ctx }) => ctx.services.requestUuidSync(input)),
 
   // Kiểm tra local + tunnel còn sống.
   ping: t.procedure

@@ -56,6 +56,21 @@ export const NotifyPaymentEditedInput = z.object({
 });
 export const NotifyPaymentEditedOutput = z.object({ enqueued: z.boolean() });
 
+// ---------- requestUuidSync: domain vừa phát hành HĐ gốc -> local ghi hàng đợi kéo HĐ theo transactionUuid ----------
+// Thay MCP tool `viettel-sync-uuid-request` (gỡ 2026-08-25): cùng bản chất "domain fire-and-forget báo local"
+// như notifyPaymentEdited, gom về một kênh tRPC. Token đã kiểm ở tầng transport (Bearer) - KHÔNG nằm trong payload.
+export const RequestUuidSyncInput = z.object({
+  transactionUuid: z.string().min(10).max(64),
+  taxCode: z.union([z.string(), z.number().transform((v) => String(v))]).optional(), // MST bên bán (chọn đúng account local)
+  note: z.string().optional(), // ghi chú tự do (vd id draft bên domain)
+});
+export const RequestUuidSyncOutput = z.object({
+  ok: z.boolean(),
+  requestId: z.string().nullable(),
+  status: z.string().nullable(),
+  message: z.string().nullable(),
+});
+
 // ---------- ping: kiểm tra local + tunnel còn sống ----------
 export const PingOutput = z.object({ ok: z.boolean(), at: z.string() });
 
@@ -66,4 +81,6 @@ export type InvoiceData = z.infer<typeof InvoiceData>;
 export type GetInvoiceOutput = z.infer<typeof GetInvoiceOutput>;
 export type NotifyPaymentEditedInput = z.infer<typeof NotifyPaymentEditedInput>;
 export type NotifyPaymentEditedOutput = z.infer<typeof NotifyPaymentEditedOutput>;
+export type RequestUuidSyncInput = z.infer<typeof RequestUuidSyncInput>;
+export type RequestUuidSyncOutput = z.infer<typeof RequestUuidSyncOutput>;
 export type PingOutput = z.infer<typeof PingOutput>;

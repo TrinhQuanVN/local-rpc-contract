@@ -1,6 +1,7 @@
 import type {
   GetInvoiceInput, GetInvoiceOutput,
   NotifyPaymentEditedInput, NotifyPaymentEditedOutput,
+  RequestUuidSyncInput, RequestUuidSyncOutput,
   PingOutput,
 } from "./contract";
 
@@ -11,6 +12,7 @@ import type {
 export interface LocalServices {
   getInvoice(input: GetInvoiceInput): Promise<GetInvoiceOutput>;
   notifyPaymentEdited(input: NotifyPaymentEditedInput): Promise<NotifyPaymentEditedOutput>;
+  requestUuidSync(input: RequestUuidSyncInput): Promise<RequestUuidSyncOutput>;
   ping(): Promise<PingOutput>;
 }
 
