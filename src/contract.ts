@@ -118,6 +118,10 @@ export const SearchInvoicesOutput = z.object({
 // ---------- news: bài dịch toàn văn ở local (thay push local_news_articles) ----------
 export const NewsItem = z.object({
   id: z.string(), titleVi: z.string().nullable(), summaryVi: z.string().nullable(),
+  // excerptVi: đoạn trích ~220 ký tự đầu contentVi (đã bỏ ký hiệu markdown), local cắt sẵn. Domain dùng
+  // summaryVi ?? excerptVi ?? "" cho mô tả thẻ bài (summaryVi hiện null toàn bộ). hasContentVi = có bản dịch
+  // toàn văn đọc tại chỗ (mời "Đọc bản dịch đầy đủ"). KHÔNG nhồi contentVi vào danh sách (nặng).
+  excerptVi: z.string().nullable(), hasContentVi: z.boolean(),
   domainKey: z.string().nullable(), sourceName: z.string().nullable(), country: z.string().nullable(),
   publishedAt: z.string().nullable(), link: z.string().nullable(),
 });
@@ -133,15 +137,17 @@ export const LatestNewsInput = z.object({ domainKey: z.string().optional(), limi
 export const LatestNewsOutput = z.object({ items: z.array(NewsItem) });
 
 // Thẻ theo miền (1 lời gọi thay N+1) + danh sách miền + hashtag tổng hợp (§3 domain).
-export const ListNewsDomainsOutput = z.object({ domains: z.array(z.object({ domainKey: z.string(), domainLabel: z.string(), articleCount: z.number().int() })) });
+// sourceCount = số nguồn RSS khác nhau CÓ bài hiển thị trong miền (đếm distinct sourceId; scmp.com=5, còn lại=1).
+export const ListNewsDomainsOutput = z.object({ domains: z.array(z.object({ domainKey: z.string(), domainLabel: z.string(), articleCount: z.number().int(), sourceCount: z.number().int() })) });
 export const NewsDomainCardsInput = z.object({ cardSize: z.number().int().min(1).max(20).default(3) });
-export const NewsDomainCardsOutput = z.object({ cards: z.array(z.object({ domainKey: z.string(), domainLabel: z.string(), articleCount: z.number().int(), articles: z.array(NewsItem) })) });
+export const NewsDomainCardsOutput = z.object({ cards: z.array(z.object({ domainKey: z.string(), domainLabel: z.string(), articleCount: z.number().int(), sourceCount: z.number().int(), articles: z.array(NewsItem) })) });
 export const TopNewsHashtagsInput = z.object({ domainKey: z.string().min(1), limit: z.number().int().min(1).max(50).default(12) });
 export const TopNewsHashtagsOutput = z.object({ tags: z.array(z.object({ tag: z.string(), count: z.number().int() })) });
 export const GetNewsArticleInput = z.object({ id: z.string().min(1) });
 export const GetNewsArticleOutput = z.object({
   found: z.boolean(),
-  article: NewsItem.extend({ contentVi: z.string().nullable(), category: z.string().nullable(), hashtags: z.array(z.string()) }).nullable(),
+  // title = tiêu đề GỐC chưa dịch (trang chi tiết in dưới bản dịch để đối chiếu; ẩn khi trùng titleVi).
+  article: NewsItem.extend({ title: z.string().nullable(), contentVi: z.string().nullable(), category: z.string().nullable(), hashtags: z.array(z.string()) }).nullable(),
 });
 
 // ---------- price: giá crawl ở local (thay push crawled_price_values/price_aggregates) ----------
