@@ -123,12 +123,21 @@ export const NewsItem = z.object({
 });
 export const SearchNewsInput = z.object({
   query: z.string().optional(), domainKey: z.string().optional(), country: z.string().optional(),
+  hashtag: z.string().optional(),
   fromDate: z.string().optional(), toDate: z.string().optional(),
   page: z.number().int().min(1).default(1), pageSize: z.number().int().min(1).max(100).default(20),
+  cursor: z.string().optional(), // phân trang CURSOR theo id (ổn định khi đẩy bài mới) - ưu tiên hơn page nếu có
 });
-export const SearchNewsOutput = z.object({ total: z.number().int(), items: z.array(NewsItem) });
+export const SearchNewsOutput = z.object({ total: z.number().int(), items: z.array(NewsItem), nextCursor: z.string().nullable() });
 export const LatestNewsInput = z.object({ domainKey: z.string().optional(), limit: z.number().int().min(1).max(100).default(20) });
 export const LatestNewsOutput = z.object({ items: z.array(NewsItem) });
+
+// Thẻ theo miền (1 lời gọi thay N+1) + danh sách miền + hashtag tổng hợp (§3 domain).
+export const ListNewsDomainsOutput = z.object({ domains: z.array(z.object({ domainKey: z.string(), domainLabel: z.string(), articleCount: z.number().int() })) });
+export const NewsDomainCardsInput = z.object({ cardSize: z.number().int().min(1).max(20).default(3) });
+export const NewsDomainCardsOutput = z.object({ cards: z.array(z.object({ domainKey: z.string(), domainLabel: z.string(), articleCount: z.number().int(), articles: z.array(NewsItem) })) });
+export const TopNewsHashtagsInput = z.object({ domainKey: z.string().min(1), limit: z.number().int().min(1).max(50).default(12) });
+export const TopNewsHashtagsOutput = z.object({ tags: z.array(z.object({ tag: z.string(), count: z.number().int() })) });
 export const GetNewsArticleInput = z.object({ id: z.string().min(1) });
 export const GetNewsArticleOutput = z.object({
   found: z.boolean(),
@@ -178,6 +187,11 @@ export type LatestNewsInput = z.infer<typeof LatestNewsInput>;
 export type LatestNewsOutput = z.infer<typeof LatestNewsOutput>;
 export type GetNewsArticleInput = z.infer<typeof GetNewsArticleInput>;
 export type GetNewsArticleOutput = z.infer<typeof GetNewsArticleOutput>;
+export type ListNewsDomainsOutput = z.infer<typeof ListNewsDomainsOutput>;
+export type NewsDomainCardsInput = z.infer<typeof NewsDomainCardsInput>;
+export type NewsDomainCardsOutput = z.infer<typeof NewsDomainCardsOutput>;
+export type TopNewsHashtagsInput = z.infer<typeof TopNewsHashtagsInput>;
+export type TopNewsHashtagsOutput = z.infer<typeof TopNewsHashtagsOutput>;
 export type GetLatestPriceInput = z.infer<typeof GetLatestPriceInput>;
 export type GetLatestPriceOutput = z.infer<typeof GetLatestPriceOutput>;
 export type GetPriceHistoryInput = z.infer<typeof GetPriceHistoryInput>;

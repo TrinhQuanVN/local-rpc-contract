@@ -12,6 +12,9 @@ import {
   SearchNewsInput, SearchNewsOutput,
   LatestNewsInput, LatestNewsOutput,
   GetNewsArticleInput, GetNewsArticleOutput,
+  ListNewsDomainsOutput,
+  NewsDomainCardsInput, NewsDomainCardsOutput,
+  TopNewsHashtagsInput, TopNewsHashtagsOutput,
   GetLatestPriceInput, GetLatestPriceOutput,
   GetPriceHistoryInput, GetPriceHistoryOutput,
   PingOutput,
@@ -80,6 +83,12 @@ export const appRouter = t.router({
     .query(({ input, ctx }) => ctx.services.latestNews(input)),
   getNewsArticle: newsRead.input(GetNewsArticleInput).output(GetNewsArticleOutput)
     .query(({ input, ctx }) => ctx.services.getNewsArticle(input)),
+  listNewsDomains: newsRead.output(ListNewsDomainsOutput)
+    .query(({ ctx }) => ctx.services.listNewsDomains()),
+  newsDomainCards: newsRead.input(NewsDomainCardsInput).output(NewsDomainCardsOutput)
+    .query(({ input, ctx }) => ctx.services.newsDomainCards(input)),
+  topNewsHashtags: newsRead.input(TopNewsHashtagsInput).output(TopNewsHashtagsOutput)
+    .query(({ input, ctx }) => ctx.services.topNewsHashtags(input)),
 
   // Giá (thay push crawled_price_values/price_aggregates).
   getLatestPrice: priceRead.input(GetLatestPriceInput).output(GetLatestPriceOutput)

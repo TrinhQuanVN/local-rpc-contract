@@ -10,6 +10,9 @@ import type {
   SearchNewsInput, SearchNewsOutput,
   LatestNewsInput, LatestNewsOutput,
   GetNewsArticleInput, GetNewsArticleOutput,
+  ListNewsDomainsOutput,
+  NewsDomainCardsInput, NewsDomainCardsOutput,
+  TopNewsHashtagsInput, TopNewsHashtagsOutput,
   GetLatestPriceInput, GetLatestPriceOutput,
   GetPriceHistoryInput, GetPriceHistoryOutput,
   PingOutput,
@@ -31,6 +34,9 @@ export interface LocalServices {
   searchNews(input: SearchNewsInput): Promise<SearchNewsOutput>;
   latestNews(input: LatestNewsInput): Promise<LatestNewsOutput>;
   getNewsArticle(input: GetNewsArticleInput): Promise<GetNewsArticleOutput>;
+  listNewsDomains(): Promise<ListNewsDomainsOutput>;
+  newsDomainCards(input: NewsDomainCardsInput): Promise<NewsDomainCardsOutput>;
+  topNewsHashtags(input: TopNewsHashtagsInput): Promise<TopNewsHashtagsOutput>;
   getLatestPrice(input: GetLatestPriceInput): Promise<GetLatestPriceOutput>;
   getPriceHistory(input: GetPriceHistoryInput): Promise<GetPriceHistoryOutput>;
   ping(): Promise<PingOutput>;
