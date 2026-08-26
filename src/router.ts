@@ -1,5 +1,6 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import type { LocalContext } from "./services";
+import { ErrorCode } from "./errorCodes";
 import {
   GetInvoiceInput, GetInvoiceOutput,
   NotifyPaymentEditedInput, NotifyPaymentEditedOutput,
@@ -27,9 +28,19 @@ import {
  * SCOPE THÔ (2026-08-26): giới hạn DOMAIN-SERVICE làm được gì ở local (KHÔNG phải phân quyền người dùng - việc
  * đó domain tự lo bằng RBAC của nó). scopes=["*"] (token tĩnh) qua hết. errorFormatter cắt stack (không rò).
  */
+// Map mã tRPC -> mã SỐ chung (errorCodes). Gắn codeNumber vào error.data để domain đối chiếu (spec B4).
+const TRPC_TO_NUMBER: Record<string, number> = {
+  UNAUTHORIZED: ErrorCode.INVALID_SERVICE_TOKEN,
+  FORBIDDEN: ErrorCode.MISSING_SCOPE,
+  BAD_REQUEST: ErrorCode.VALIDATION_ERROR,
+  PARSE_ERROR: ErrorCode.VALIDATION_ERROR,
+  NOT_FOUND: ErrorCode.NOT_FOUND,
+  INTERNAL_SERVER_ERROR: ErrorCode.INTERNAL_ERROR,
+};
 const t = initTRPC.context<LocalContext>().create({
   errorFormatter({ shape }) {
-    return { ...shape, data: { ...shape.data, stack: undefined } };
+    const codeNumber = TRPC_TO_NUMBER[shape.data?.code as string] ?? ErrorCode.INTERNAL_ERROR;
+    return { ...shape, data: { ...shape.data, stack: undefined, codeNumber } };
   },
 });
 
