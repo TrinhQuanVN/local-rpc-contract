@@ -92,6 +92,64 @@ export const UpsertViettelAccountOutput = z.object({ ok: z.boolean(), taxCode: z
 export const SetViettelAccountSyncInput = z.object({ taxCode: z.string().min(1), syncEnabled: z.boolean() });
 export const SetViettelAccountSyncOutput = z.object({ ok: z.boolean() });
 
+// ---------- getInvoicePdf: PDF HĐ cũ (ngoài cửa sổ Neon) - render/đọc theo yêu cầu ----------
+export const GetInvoicePdfInput = z.object({ invoiceNo: z.string().min(1), taxCode: z.string().optional() });
+export const GetInvoicePdfOutput = z.object({ found: z.boolean(), mimeType: z.string().nullable(), base64: z.string().nullable() });
+
+// ---------- searchInvoices: tra lịch sử HĐ (rút gọn, phân trang) ----------
+export const SearchInvoicesInput = z.object({
+  taxCode: z.string().optional(),
+  buyerIdNo: z.string().optional(),
+  buyerName: z.string().optional(),
+  itemCode: z.string().optional(),
+  fromDate: z.string().optional(), // ISO date
+  toDate: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
+});
+export const SearchInvoicesOutput = z.object({
+  total: z.number().int(),
+  items: z.array(z.object({
+    invoiceNo: z.string().nullable(), invoiceSeri: z.string().nullable(), issueDate: z.string().nullable(),
+    buyerName: z.string().nullable(), buyerIdNo: z.string().nullable(), total: z.number().nullable(), adjustmentType: z.string().nullable(),
+  })),
+});
+
+// ---------- news: bài dịch toàn văn ở local (thay push local_news_articles) ----------
+export const NewsItem = z.object({
+  id: z.string(), titleVi: z.string().nullable(), summaryVi: z.string().nullable(),
+  domainKey: z.string().nullable(), sourceName: z.string().nullable(), country: z.string().nullable(),
+  publishedAt: z.string().nullable(), link: z.string().nullable(),
+});
+export const SearchNewsInput = z.object({
+  query: z.string().optional(), domainKey: z.string().optional(), country: z.string().optional(),
+  fromDate: z.string().optional(), toDate: z.string().optional(),
+  page: z.number().int().min(1).default(1), pageSize: z.number().int().min(1).max(100).default(20),
+});
+export const SearchNewsOutput = z.object({ total: z.number().int(), items: z.array(NewsItem) });
+export const LatestNewsInput = z.object({ domainKey: z.string().optional(), limit: z.number().int().min(1).max(100).default(20) });
+export const LatestNewsOutput = z.object({ items: z.array(NewsItem) });
+export const GetNewsArticleInput = z.object({ id: z.string().min(1) });
+export const GetNewsArticleOutput = z.object({
+  found: z.boolean(),
+  article: NewsItem.extend({ contentVi: z.string().nullable(), category: z.string().nullable(), hashtags: z.array(z.string()) }).nullable(),
+});
+
+// ---------- price: giá crawl ở local (thay push crawled_price_values/price_aggregates) ----------
+// direction: "IN" (mua vào) | "OUT" (bán ra) - quy ước local.
+export const GetLatestPriceInput = z.object({ productKey: z.string().optional(), direction: z.string().optional() });
+export const PricePoint = z.object({ productKey: z.string(), productName: z.string().nullable(), direction: z.string(), value: z.number(), effectiveAt: z.string() });
+export const GetLatestPriceOutput = z.object({ points: z.array(PricePoint) });
+export const GetPriceHistoryInput = z.object({
+  productKey: z.string().optional(), productId: z.string().optional(), direction: z.string().optional(),
+  fromDate: z.string(), toDate: z.string(),
+  granularity: z.enum(["raw", "day", "week", "month", "quarter", "year"]).default("raw"),
+});
+export const GetPriceHistoryOutput = z.object({
+  total: z.number().int(),
+  points: z.array(z.object({ effectiveAt: z.string(), direction: z.string(), value: z.number(), productKey: z.string().nullable() })),
+});
+
 // ---------- ping: kiểm tra local + tunnel còn sống ----------
 export const PingOutput = z.object({ ok: z.boolean(), at: z.string() });
 
@@ -109,4 +167,19 @@ export type UpsertViettelAccountInput = z.infer<typeof UpsertViettelAccountInput
 export type UpsertViettelAccountOutput = z.infer<typeof UpsertViettelAccountOutput>;
 export type SetViettelAccountSyncInput = z.infer<typeof SetViettelAccountSyncInput>;
 export type SetViettelAccountSyncOutput = z.infer<typeof SetViettelAccountSyncOutput>;
+export type GetInvoicePdfInput = z.infer<typeof GetInvoicePdfInput>;
+export type GetInvoicePdfOutput = z.infer<typeof GetInvoicePdfOutput>;
+export type SearchInvoicesInput = z.infer<typeof SearchInvoicesInput>;
+export type SearchInvoicesOutput = z.infer<typeof SearchInvoicesOutput>;
+export type NewsItem = z.infer<typeof NewsItem>;
+export type SearchNewsInput = z.infer<typeof SearchNewsInput>;
+export type SearchNewsOutput = z.infer<typeof SearchNewsOutput>;
+export type LatestNewsInput = z.infer<typeof LatestNewsInput>;
+export type LatestNewsOutput = z.infer<typeof LatestNewsOutput>;
+export type GetNewsArticleInput = z.infer<typeof GetNewsArticleInput>;
+export type GetNewsArticleOutput = z.infer<typeof GetNewsArticleOutput>;
+export type GetLatestPriceInput = z.infer<typeof GetLatestPriceInput>;
+export type GetLatestPriceOutput = z.infer<typeof GetLatestPriceOutput>;
+export type GetPriceHistoryInput = z.infer<typeof GetPriceHistoryInput>;
+export type GetPriceHistoryOutput = z.infer<typeof GetPriceHistoryOutput>;
 export type PingOutput = z.infer<typeof PingOutput>;

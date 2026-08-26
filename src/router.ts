@@ -7,6 +7,13 @@ import {
   ListViettelAccountsOutput,
   UpsertViettelAccountInput, UpsertViettelAccountOutput,
   SetViettelAccountSyncInput, SetViettelAccountSyncOutput,
+  GetInvoicePdfInput, GetInvoicePdfOutput,
+  SearchInvoicesInput, SearchInvoicesOutput,
+  SearchNewsInput, SearchNewsOutput,
+  LatestNewsInput, LatestNewsOutput,
+  GetNewsArticleInput, GetNewsArticleOutput,
+  GetLatestPriceInput, GetLatestPriceOutput,
+  GetPriceHistoryInput, GetPriceHistoryOutput,
   PingOutput,
 } from "./contract";
 
@@ -36,6 +43,8 @@ const invoiceRead = t.procedure.use(requireScope("invoice:read"));
 const invoiceWrite = t.procedure.use(requireScope("invoice:write"));
 const accountRead = t.procedure.use(requireScope("account:read"));
 const accountWrite = t.procedure.use(requireScope("account:write"));
+const newsRead = t.procedure.use(requireScope("news:read"));
+const priceRead = t.procedure.use(requireScope("price:read"));
 
 export const appRouter = t.router({
   // Lấy 1 hoá đơn từ full DB local (kể cả HĐ ngoài cửa sổ Neon). Đồng bộ.
@@ -57,6 +66,26 @@ export const appRouter = t.router({
     .mutation(({ input, ctx }) => ctx.services.upsertViettelAccount(input)),
   setViettelAccountSync: accountWrite.input(SetViettelAccountSyncInput).output(SetViettelAccountSyncOutput)
     .mutation(({ input, ctx }) => ctx.services.setViettelAccountSync(input)),
+
+  // PDF HĐ cũ (ngoài cửa sổ Neon) + tra lịch sử HĐ.
+  getInvoicePdf: invoiceRead.input(GetInvoicePdfInput).output(GetInvoicePdfOutput)
+    .query(({ input, ctx }) => ctx.services.getInvoicePdf(input)),
+  searchInvoices: invoiceRead.input(SearchInvoicesInput).output(SearchInvoicesOutput)
+    .query(({ input, ctx }) => ctx.services.searchInvoices(input)),
+
+  // Tin tức (thay push local_news_articles).
+  searchNews: newsRead.input(SearchNewsInput).output(SearchNewsOutput)
+    .query(({ input, ctx }) => ctx.services.searchNews(input)),
+  latestNews: newsRead.input(LatestNewsInput).output(LatestNewsOutput)
+    .query(({ input, ctx }) => ctx.services.latestNews(input)),
+  getNewsArticle: newsRead.input(GetNewsArticleInput).output(GetNewsArticleOutput)
+    .query(({ input, ctx }) => ctx.services.getNewsArticle(input)),
+
+  // Giá (thay push crawled_price_values/price_aggregates).
+  getLatestPrice: priceRead.input(GetLatestPriceInput).output(GetLatestPriceOutput)
+    .query(({ input, ctx }) => ctx.services.getLatestPrice(input)),
+  getPriceHistory: priceRead.input(GetPriceHistoryInput).output(GetPriceHistoryOutput)
+    .query(({ input, ctx }) => ctx.services.getPriceHistory(input)),
 
   // Kiểm tra local + tunnel còn sống (không cần scope).
   ping: t.procedure.output(PingOutput).query(({ ctx }) => ctx.services.ping()),

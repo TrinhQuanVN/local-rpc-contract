@@ -5,6 +5,13 @@ import type {
   ListViettelAccountsOutput,
   UpsertViettelAccountInput, UpsertViettelAccountOutput,
   SetViettelAccountSyncInput, SetViettelAccountSyncOutput,
+  GetInvoicePdfInput, GetInvoicePdfOutput,
+  SearchInvoicesInput, SearchInvoicesOutput,
+  SearchNewsInput, SearchNewsOutput,
+  LatestNewsInput, LatestNewsOutput,
+  GetNewsArticleInput, GetNewsArticleOutput,
+  GetLatestPriceInput, GetLatestPriceOutput,
+  GetPriceHistoryInput, GetPriceHistoryOutput,
   PingOutput,
 } from "./contract";
 
@@ -19,6 +26,13 @@ export interface LocalServices {
   listViettelAccounts(): Promise<ListViettelAccountsOutput>;
   upsertViettelAccount(input: UpsertViettelAccountInput): Promise<UpsertViettelAccountOutput>;
   setViettelAccountSync(input: SetViettelAccountSyncInput): Promise<SetViettelAccountSyncOutput>;
+  getInvoicePdf(input: GetInvoicePdfInput): Promise<GetInvoicePdfOutput>;
+  searchInvoices(input: SearchInvoicesInput): Promise<SearchInvoicesOutput>;
+  searchNews(input: SearchNewsInput): Promise<SearchNewsOutput>;
+  latestNews(input: LatestNewsInput): Promise<LatestNewsOutput>;
+  getNewsArticle(input: GetNewsArticleInput): Promise<GetNewsArticleOutput>;
+  getLatestPrice(input: GetLatestPriceInput): Promise<GetLatestPriceOutput>;
+  getPriceHistory(input: GetPriceHistoryInput): Promise<GetPriceHistoryOutput>;
   ping(): Promise<PingOutput>;
 }
 
