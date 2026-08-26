@@ -71,6 +71,27 @@ export const RequestUuidSyncOutput = z.object({
   message: z.string().nullable(),
 });
 
+// ---------- Quản lý tài khoản Viettel (admin, scope account:*) ----------
+// KHÔNG BAO GIỜ trả password (kể cả che). Domain chỉ cần hasCredentials. syncEnabled TÁCH khỏi có-credentials.
+export const ListViettelAccountsOutput = z.object({
+  accounts: z.array(z.object({
+    taxCode: z.string(),
+    username: z.string(),
+    syncEnabled: z.boolean(),
+    hasCredentials: z.boolean(),
+    invoiceCount: z.number().int(),
+  })),
+});
+export const UpsertViettelAccountInput = z.object({
+  taxCode: z.string().min(1),
+  username: z.string().min(1),
+  password: z.string().min(1),
+  syncEnabled: z.boolean().default(false),
+});
+export const UpsertViettelAccountOutput = z.object({ ok: z.boolean(), taxCode: z.string(), created: z.boolean() });
+export const SetViettelAccountSyncInput = z.object({ taxCode: z.string().min(1), syncEnabled: z.boolean() });
+export const SetViettelAccountSyncOutput = z.object({ ok: z.boolean() });
+
 // ---------- ping: kiểm tra local + tunnel còn sống ----------
 export const PingOutput = z.object({ ok: z.boolean(), at: z.string() });
 
@@ -83,4 +104,9 @@ export type NotifyPaymentEditedInput = z.infer<typeof NotifyPaymentEditedInput>;
 export type NotifyPaymentEditedOutput = z.infer<typeof NotifyPaymentEditedOutput>;
 export type RequestUuidSyncInput = z.infer<typeof RequestUuidSyncInput>;
 export type RequestUuidSyncOutput = z.infer<typeof RequestUuidSyncOutput>;
+export type ListViettelAccountsOutput = z.infer<typeof ListViettelAccountsOutput>;
+export type UpsertViettelAccountInput = z.infer<typeof UpsertViettelAccountInput>;
+export type UpsertViettelAccountOutput = z.infer<typeof UpsertViettelAccountOutput>;
+export type SetViettelAccountSyncInput = z.infer<typeof SetViettelAccountSyncInput>;
+export type SetViettelAccountSyncOutput = z.infer<typeof SetViettelAccountSyncOutput>;
 export type PingOutput = z.infer<typeof PingOutput>;
