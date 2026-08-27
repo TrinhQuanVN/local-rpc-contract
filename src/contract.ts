@@ -112,6 +112,10 @@ export const SearchInvoicesOutput = z.object({
   items: z.array(z.object({
     invoiceNo: z.string().nullable(), invoiceSeri: z.string().nullable(), issueDate: z.string().nullable(),
     buyerName: z.string().nullable(), buyerIdNo: z.string().nullable(), total: z.number().nullable(), adjustmentType: z.string().nullable(),
+    // +5 trường (2026-08-27) để domain gộp bảng tìm local + Neon: invoiceNumber(số HĐ), templateCode(mẫu số),
+    // paymentMethod(PTTT = mPaymentMethod), taxCode(MST của account), invoiceId(khoá ổn định khử trùng - BigInt→string).
+    invoiceNumber: z.string().nullable(), templateCode: z.string().nullable(), paymentMethod: z.string().nullable(),
+    taxCode: z.string().nullable(), invoiceId: z.string().nullable(),
   })),
 });
 
