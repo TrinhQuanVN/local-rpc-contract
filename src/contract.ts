@@ -170,7 +170,10 @@ export const GetPriceHistoryOutput = z.object({
 });
 
 // ---------- ping: kiểm tra local + tunnel còn sống ----------
-export const PingOutput = z.object({ ok: z.boolean(), at: z.string() });
+// healthy = local SỐNG và LÀM ĐƯỢC VIỆC: ping trả lời (tRPC+tunnel sống) VÀ trình rút hộp thư chạy gần đây
+// (Mastra/scheduler sống). Domain CHỈ cần đọc `healthy` - local tự tính, không cần biết chi tiết bên trong.
+// ok=true luôn (ping trả được là tRPC sống); healthy=false nghĩa tRPC sống nhưng drain chết (đừng dựa vào local).
+export const PingOutput = z.object({ ok: z.boolean(), at: z.string(), healthy: z.boolean() });
 
 // Type suy ra (dùng ở cả 2 đầu)
 export type GetInvoiceInput = z.infer<typeof GetInvoiceInput>;
