@@ -5,6 +5,7 @@ import type {
   ListViettelAccountsOutput,
   UpsertViettelAccountInput, UpsertViettelAccountOutput,
   SetViettelAccountSyncInput, SetViettelAccountSyncOutput,
+  DeleteViettelAccountInput, DeleteViettelAccountOutput,
   GetInvoicePdfInput, GetInvoicePdfOutput,
   SearchInvoicesInput, SearchInvoicesOutput,
   SearchNewsInput, SearchNewsOutput,
@@ -29,6 +30,7 @@ export interface LocalServices {
   listViettelAccounts(): Promise<ListViettelAccountsOutput>;
   upsertViettelAccount(input: UpsertViettelAccountInput): Promise<UpsertViettelAccountOutput>;
   setViettelAccountSync(input: SetViettelAccountSyncInput): Promise<SetViettelAccountSyncOutput>;
+  deleteViettelAccount(input: DeleteViettelAccountInput): Promise<DeleteViettelAccountOutput>;
   getInvoicePdf(input: GetInvoicePdfInput): Promise<GetInvoicePdfOutput>;
   searchInvoices(input: SearchInvoicesInput): Promise<SearchInvoicesOutput>;
   searchNews(input: SearchNewsInput): Promise<SearchNewsOutput>;

@@ -8,6 +8,7 @@ import {
   ListViettelAccountsOutput,
   UpsertViettelAccountInput, UpsertViettelAccountOutput,
   SetViettelAccountSyncInput, SetViettelAccountSyncOutput,
+  DeleteViettelAccountInput, DeleteViettelAccountOutput,
   GetInvoicePdfInput, GetInvoicePdfOutput,
   SearchInvoicesInput, SearchInvoicesOutput,
   SearchNewsInput, SearchNewsOutput,
@@ -80,6 +81,9 @@ export const appRouter = t.router({
     .mutation(({ input, ctx }) => ctx.services.upsertViettelAccount(input)),
   setViettelAccountSync: accountWrite.input(SetViettelAccountSyncInput).output(SetViettelAccountSyncOutput)
     .mutation(({ input, ctx }) => ctx.services.setViettelAccountSync(input)),
+  // XOÁ tài khoản (admin) - cascade sạch mọi HĐ của MST. account:write.
+  deleteViettelAccount: accountWrite.input(DeleteViettelAccountInput).output(DeleteViettelAccountOutput)
+    .mutation(({ input, ctx }) => ctx.services.deleteViettelAccount(input)),
 
   // PDF HĐ cũ (ngoài cửa sổ Neon) + tra lịch sử HĐ.
   getInvoicePdf: invoiceRead.input(GetInvoicePdfInput).output(GetInvoicePdfOutput)

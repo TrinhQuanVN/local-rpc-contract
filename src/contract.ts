@@ -73,11 +73,14 @@ export const RequestUuidSyncOutput = z.object({
 
 // ---------- Quản lý tài khoản Viettel (admin, scope account:*) ----------
 // KHÔNG BAO GIỜ trả password (kể cả che). Domain chỉ cần hasCredentials. syncEnabled TÁCH khỏi có-credentials.
+// 2 QUYỀN SYNC tách rời (2026-08-28): syncEnabled = AUTO-WORKFLOW (local tự quét lịch); apiSyncEnabled = domain
+// gọi API/outbox syncInvoicesNow được. Domain-admin cấp riêng từng cái.
 export const ListViettelAccountsOutput = z.object({
   accounts: z.array(z.object({
     taxCode: z.string(),
     username: z.string(),
-    syncEnabled: z.boolean(),
+    syncEnabled: z.boolean(),        // = autoWorkflowSync (local tự quét lịch)
+    apiSyncEnabled: z.boolean(),     // domain gọi API/outbox kéo được
     hasCredentials: z.boolean(),
     invoiceCount: z.number().int(),
   })),
@@ -86,11 +89,20 @@ export const UpsertViettelAccountInput = z.object({
   taxCode: z.string().min(1),
   username: z.string().min(1),
   password: z.string().min(1),
-  syncEnabled: z.boolean().default(false),
+  syncEnabled: z.boolean().default(false),   // autoWorkflowSync
+  apiSyncEnabled: z.boolean().default(true),
 });
 export const UpsertViettelAccountOutput = z.object({ ok: z.boolean(), taxCode: z.string(), created: z.boolean() });
-export const SetViettelAccountSyncInput = z.object({ taxCode: z.string().min(1), syncEnabled: z.boolean() });
-export const SetViettelAccountSyncOutput = z.object({ ok: z.boolean() });
+// Chỉnh QUYỀN sync (KHÁC upsert - không đụng credential). Chỉ cập nhật cờ được truyền (bỏ trống = giữ nguyên).
+export const SetViettelAccountSyncInput = z.object({
+  taxCode: z.string().min(1),
+  autoWorkflowSync: z.boolean().optional(),  // local tự quét lịch
+  apiSync: z.boolean().optional(),           // domain gọi API kéo
+});
+export const SetViettelAccountSyncOutput = z.object({ ok: z.boolean(), autoWorkflowSync: z.boolean(), apiSync: z.boolean() });
+// XOÁ tài khoản (admin) - cascade SẠCH mọi HĐ/truth/sync-day của MST. KHÔNG đảo được.
+export const DeleteViettelAccountInput = z.object({ taxCode: z.string().min(1) });
+export const DeleteViettelAccountOutput = z.object({ ok: z.boolean(), deleted: z.boolean(), invoicesDeleted: z.number().int() });
 
 // ---------- getInvoicePdf: PDF HĐ cũ (ngoài cửa sổ Neon) - render/đọc theo yêu cầu ----------
 export const GetInvoicePdfInput = z.object({ invoiceNo: z.string().min(1), taxCode: z.string().optional() });
@@ -189,6 +201,8 @@ export type UpsertViettelAccountInput = z.infer<typeof UpsertViettelAccountInput
 export type UpsertViettelAccountOutput = z.infer<typeof UpsertViettelAccountOutput>;
 export type SetViettelAccountSyncInput = z.infer<typeof SetViettelAccountSyncInput>;
 export type SetViettelAccountSyncOutput = z.infer<typeof SetViettelAccountSyncOutput>;
+export type DeleteViettelAccountInput = z.infer<typeof DeleteViettelAccountInput>;
+export type DeleteViettelAccountOutput = z.infer<typeof DeleteViettelAccountOutput>;
 export type GetInvoicePdfInput = z.infer<typeof GetInvoicePdfInput>;
 export type GetInvoicePdfOutput = z.infer<typeof GetInvoicePdfOutput>;
 export type SearchInvoicesInput = z.infer<typeof SearchInvoicesInput>;
