@@ -168,17 +168,23 @@ export const GetNewsArticleOutput = z.object({
 
 // ---------- price: giá crawl ở local (thay push crawled_price_values/price_aggregates) ----------
 // direction: "IN" (mua vào) | "OUT" (bán ra) - quy ước local.
-export const GetLatestPriceInput = z.object({ productKey: z.string().optional(), direction: z.string().optional() });
-export const PricePoint = z.object({ productKey: z.string(), productName: z.string().nullable(), direction: z.string(), value: z.number(), effectiveAt: z.string() });
+export const GetLatestPriceInput = z.object({ productKey: z.string().optional(), sourceKey: z.string().optional(), direction: z.string().optional() });
+// sourceKey PHÂN BIỆT NGUỒN: productKey KHÔNG duy nhất giữa các nguồn (vd BẠC 999 ở cả DOJI lẫn PHUQUY) - domain
+// phải nhóm theo (sourceKey, productKey) kẻo gộp giá 2 nguồn thành 1 dòng sai. currencyCode/quoteUnit để tách cột.
+export const PricePoint = z.object({
+  productKey: z.string(), productName: z.string().nullable(),
+  sourceKey: z.string(), sourceName: z.string(), currencyCode: z.string(), quoteUnit: z.string(),
+  direction: z.string(), value: z.number(), effectiveAt: z.string(),
+});
 export const GetLatestPriceOutput = z.object({ points: z.array(PricePoint) });
 export const GetPriceHistoryInput = z.object({
-  productKey: z.string().optional(), productId: z.string().optional(), direction: z.string().optional(),
+  productKey: z.string().optional(), productId: z.string().optional(), sourceKey: z.string().optional(), direction: z.string().optional(),
   fromDate: z.string(), toDate: z.string(),
   granularity: z.enum(["raw", "day", "week", "month", "quarter", "year"]).default("raw"),
 });
 export const GetPriceHistoryOutput = z.object({
   total: z.number().int(),
-  points: z.array(z.object({ effectiveAt: z.string(), direction: z.string(), value: z.number(), productKey: z.string().nullable() })),
+  points: z.array(z.object({ effectiveAt: z.string(), direction: z.string(), value: z.number(), productKey: z.string().nullable(), sourceKey: z.string().nullable(), currencyCode: z.string().nullable(), quoteUnit: z.string().nullable() })),
 });
 
 // ---------- ping: kiểm tra local + tunnel còn sống ----------
