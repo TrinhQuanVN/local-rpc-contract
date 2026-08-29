@@ -174,6 +174,9 @@ export const GetLatestPriceInput = z.object({ productKey: z.string().optional(),
 export const PricePoint = z.object({
   productKey: z.string(), productName: z.string().nullable(),
   sourceKey: z.string(), sourceName: z.string(), currencyCode: z.string(), quoteUnit: z.string(),
+  // currencyNameVi: tên tiếng Việt của mã tiền tệ (tra bảng CurrencyLabel local, vd USD->"Đô la Mỹ", EUR->"Euro").
+  // null khi mã không có trong bảng (commodities/kim loại như XAU, hoặc mã lạ) - domain hiển thị fallback currencyCode.
+  currencyNameVi: z.string().nullable(),
   direction: z.string(), value: z.number(), effectiveAt: z.string(),
 });
 export const GetLatestPriceOutput = z.object({ points: z.array(PricePoint) });
@@ -184,7 +187,7 @@ export const GetPriceHistoryInput = z.object({
 });
 export const GetPriceHistoryOutput = z.object({
   total: z.number().int(),
-  points: z.array(z.object({ effectiveAt: z.string(), direction: z.string(), value: z.number(), productKey: z.string().nullable(), sourceKey: z.string().nullable(), currencyCode: z.string().nullable(), quoteUnit: z.string().nullable() })),
+  points: z.array(z.object({ effectiveAt: z.string(), direction: z.string(), value: z.number(), productKey: z.string().nullable(), sourceKey: z.string().nullable(), currencyCode: z.string().nullable(), currencyNameVi: z.string().nullable(), quoteUnit: z.string().nullable() })),
 });
 
 // ---------- VBPL (văn bản pháp luật): local SỞ HỮU toàn bộ, domain CHỈ ĐỌC (spec-chuyen-vbpl-sang-local) ----------
