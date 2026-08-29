@@ -19,6 +19,10 @@ import {
   TopNewsHashtagsInput, TopNewsHashtagsOutput,
   GetLatestPriceInput, GetLatestPriceOutput,
   GetPriceHistoryInput, GetPriceHistoryOutput,
+  ListVbplDocumentsInput, ListVbplDocumentsOutput,
+  GetVbplDocumentInput, GetVbplDocumentOutput,
+  SearchVbplContentInput, SearchVbplContentOutput,
+  GetVbplDocumentFileInput, GetVbplDocumentFileOutput,
   PingOutput,
 } from "./contract";
 
@@ -60,6 +64,7 @@ const accountRead = t.procedure.use(requireScope("account:read"));
 const accountWrite = t.procedure.use(requireScope("account:write"));
 const newsRead = t.procedure.use(requireScope("news:read"));
 const priceRead = t.procedure.use(requireScope("price:read"));
+const vbplRead = t.procedure.use(requireScope("vbpl:read"));
 
 export const appRouter = t.router({
   // Lấy 1 hoá đơn từ full DB local (kể cả HĐ ngoài cửa sổ Neon). Đồng bộ.
@@ -110,6 +115,16 @@ export const appRouter = t.router({
     .query(({ input, ctx }) => ctx.services.getLatestPrice(input)),
   getPriceHistory: priceRead.input(GetPriceHistoryInput).output(GetPriceHistoryOutput)
     .query(({ input, ctx }) => ctx.services.getPriceHistory(input)),
+
+  // VBPL (local sở hữu toàn bộ, domain chỉ đọc). Scope vbpl:read riêng.
+  listVbplDocuments: vbplRead.input(ListVbplDocumentsInput).output(ListVbplDocumentsOutput)
+    .query(({ input, ctx }) => ctx.services.listVbplDocuments(input)),
+  getVbplDocument: vbplRead.input(GetVbplDocumentInput).output(GetVbplDocumentOutput)
+    .query(({ input, ctx }) => ctx.services.getVbplDocument(input)),
+  searchVbplContent: vbplRead.input(SearchVbplContentInput).output(SearchVbplContentOutput)
+    .query(({ input, ctx }) => ctx.services.searchVbplContent(input)),
+  getVbplDocumentFile: vbplRead.input(GetVbplDocumentFileInput).output(GetVbplDocumentFileOutput)
+    .query(({ input, ctx }) => ctx.services.getVbplDocumentFile(input)),
 
   // Kiểm tra local + tunnel còn sống (không cần scope).
   ping: t.procedure.output(PingOutput).query(({ ctx }) => ctx.services.ping()),

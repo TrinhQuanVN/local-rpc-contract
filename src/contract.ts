@@ -187,6 +187,95 @@ export const GetPriceHistoryOutput = z.object({
   points: z.array(z.object({ effectiveAt: z.string(), direction: z.string(), value: z.number(), productKey: z.string().nullable(), sourceKey: z.string().nullable(), currencyCode: z.string().nullable(), quoteUnit: z.string().nullable() })),
 });
 
+// ---------- VBPL (văn bản pháp luật): local SỞ HỮU toàn bộ, domain CHỈ ĐỌC (spec-chuyen-vbpl-sang-local) ----------
+// 4 thủ tục ĐỌC: listVbplDocuments (danh sách/tra cứu, KHÔNG cây), getVbplDocument (chi tiết + cây điều khoản),
+// searchVbplContent (tìm trong thân điều khoản), getVbplDocumentFile (bản gốc PDF/DOCX base64).
+// GHI CHÚ nullability: nhiều trường header (number/issueDate/summary/issuePlace/issuingAuthority) để NULLABLE
+// vì trích tự động (OCR/AI) KHÔNG bảo đảm luôn có - khác gợi ý "string" trong spec domain (domain xử null bằng ??).
+
+export const ListVbplDocumentsInput = z.object({
+  query: z.string().optional(),        // ILIKE trong number + summary + issuingAuthority
+  documentType: z.string().optional(), // enum VbplDocumentType (LUAT|NGHI_DINH|THONG_TU|...)
+  status: z.string().optional(),       // enum VbplEffectiveStatus (EFFECTIVE|EXPIRED|REPLACED|...)
+  effectiveOn: z.string().optional(),  // ISO date - còn hiệu lực tại ngày (effectiveFrom<=d AND (effectiveTo null OR >=d))
+  fromDate: z.string().optional(),     // theo issueDate
+  toDate: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
+});
+export const VbplDocumentListItem = z.object({
+  id: z.string(),
+  documentType: z.string(),
+  number: z.string().nullable(),          // "254/2026/NĐ-CP"
+  issuingAuthority: z.string().nullable(),
+  issuePlace: z.string().nullable(),
+  issueDate: z.string().nullable(),       // ISO
+  summary: z.string().nullable(),         // trích yếu
+  effectiveFrom: z.string().nullable(),
+  effectiveTo: z.string().nullable(),
+  status: z.string(),
+  hasFile: z.boolean(),                   // có FileAsset (bản gốc) không
+});
+export const ListVbplDocumentsOutput = z.object({ total: z.number().int(), items: z.array(VbplDocumentListItem) });
+
+// Node cây điều khoản (đệ quy). SUBPOINT giữ trong enum cho đủ spec dù local gộp điểm con vào content của POINT.
+export type VbplNodeKind = "PART" | "CHAPTER" | "SECTION" | "SUBSECTION" | "ARTICLE" | "CLAUSE" | "POINT" | "SUBPOINT";
+export type VbplNode = {
+  id: string;
+  kind: VbplNodeKind;
+  ordinal: string;              // "I" | "1" | "a" - token đánh số, giữ nguyên của văn bản
+  heading: string | null;       // tên (tiêu đề Chương/Mục/Điều); null nếu không có
+  text: string | null;          // thân nội dung (Điều không chia khoản / Khoản / Điểm)
+  children: VbplNode[];
+};
+export const VbplNode: z.ZodType<VbplNode> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    kind: z.enum(["PART", "CHAPTER", "SECTION", "SUBSECTION", "ARTICLE", "CLAUSE", "POINT", "SUBPOINT"]),
+    ordinal: z.string(),
+    heading: z.string().nullable(),
+    text: z.string().nullable(),
+    children: z.array(VbplNode),
+  }),
+);
+
+export const GetVbplDocumentInput = z.object({ id: z.string().min(1) });
+export const VbplDocumentDetail = VbplDocumentListItem.extend({
+  textIncludeLegalBases: z.string().nullable(),
+  legalBases: z.array(z.object({ text: z.string(), referencedDocumentId: z.string().nullable() })),
+  // CÂY: local KHÔNG có văn bản dùng Phần; Điều gắn thẳng dưới Chương/Mục. Trả 1 mảng `nodes` ở gốc, tự chứa
+  // cả trường hợp có/không Phần-Chương (spec §2.2 cho phép; đây là lựa chọn gọn nhất). Văn bản không Chương thì
+  // `nodes` = các Điều ở gốc.
+  nodes: z.array(VbplNode),
+});
+export const GetVbplDocumentOutput = z.object({ found: z.boolean(), document: VbplDocumentDetail.nullable() });
+
+export const SearchVbplContentInput = z.object({
+  query: z.string().min(1),
+  documentId: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
+});
+export const SearchVbplContentOutput = z.object({
+  total: z.number().int(),
+  items: z.array(z.object({
+    documentId: z.string(),
+    documentNumber: z.string().nullable(),
+    nodeId: z.string(),
+    kind: z.string(),
+    path: z.string(),      // "Chương II > Điều 12 > Khoản 3"
+    snippet: z.string(),   // đoạn khớp đã cắt gọn
+  })),
+});
+
+export const GetVbplDocumentFileInput = z.object({ documentId: z.string().min(1), fileId: z.string().optional() });
+export const GetVbplDocumentFileOutput = z.object({
+  found: z.boolean(),
+  mimeType: z.string().nullable(),
+  fileName: z.string().nullable(),
+  base64: z.string().nullable(),
+});
+
 // ---------- ping: kiểm tra local + tunnel còn sống ----------
 // healthy = local SỐNG và LÀM ĐƯỢC VIỆC: ping trả lời (tRPC+tunnel sống) VÀ trình rút hộp thư chạy gần đây
 // (Mastra/scheduler sống). Domain CHỈ cần đọc `healthy` - local tự tính, không cần biết chi tiết bên trong.
@@ -229,4 +318,14 @@ export type GetLatestPriceInput = z.infer<typeof GetLatestPriceInput>;
 export type GetLatestPriceOutput = z.infer<typeof GetLatestPriceOutput>;
 export type GetPriceHistoryInput = z.infer<typeof GetPriceHistoryInput>;
 export type GetPriceHistoryOutput = z.infer<typeof GetPriceHistoryOutput>;
+export type ListVbplDocumentsInput = z.infer<typeof ListVbplDocumentsInput>;
+export type VbplDocumentListItem = z.infer<typeof VbplDocumentListItem>;
+export type ListVbplDocumentsOutput = z.infer<typeof ListVbplDocumentsOutput>;
+export type GetVbplDocumentInput = z.infer<typeof GetVbplDocumentInput>;
+export type VbplDocumentDetail = z.infer<typeof VbplDocumentDetail>;
+export type GetVbplDocumentOutput = z.infer<typeof GetVbplDocumentOutput>;
+export type SearchVbplContentInput = z.infer<typeof SearchVbplContentInput>;
+export type SearchVbplContentOutput = z.infer<typeof SearchVbplContentOutput>;
+export type GetVbplDocumentFileInput = z.infer<typeof GetVbplDocumentFileInput>;
+export type GetVbplDocumentFileOutput = z.infer<typeof GetVbplDocumentFileOutput>;
 export type PingOutput = z.infer<typeof PingOutput>;

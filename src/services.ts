@@ -16,6 +16,10 @@ import type {
   TopNewsHashtagsInput, TopNewsHashtagsOutput,
   GetLatestPriceInput, GetLatestPriceOutput,
   GetPriceHistoryInput, GetPriceHistoryOutput,
+  ListVbplDocumentsInput, ListVbplDocumentsOutput,
+  GetVbplDocumentInput, GetVbplDocumentOutput,
+  SearchVbplContentInput, SearchVbplContentOutput,
+  GetVbplDocumentFileInput, GetVbplDocumentFileOutput,
   PingOutput,
 } from "./contract";
 
@@ -41,6 +45,10 @@ export interface LocalServices {
   topNewsHashtags(input: TopNewsHashtagsInput): Promise<TopNewsHashtagsOutput>;
   getLatestPrice(input: GetLatestPriceInput): Promise<GetLatestPriceOutput>;
   getPriceHistory(input: GetPriceHistoryInput): Promise<GetPriceHistoryOutput>;
+  listVbplDocuments(input: ListVbplDocumentsInput): Promise<ListVbplDocumentsOutput>;
+  getVbplDocument(input: GetVbplDocumentInput): Promise<GetVbplDocumentOutput>;
+  searchVbplContent(input: SearchVbplContentInput): Promise<SearchVbplContentOutput>;
+  getVbplDocumentFile(input: GetVbplDocumentFileInput): Promise<GetVbplDocumentFileOutput>;
   ping(): Promise<PingOutput>;
 }
 
